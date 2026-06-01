@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PUMPKIN NEWS — Pumpkin Studios</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0d0d0d;color:#ff8c00;font-family:'Press Start 2P',monospace;cursor:none;min-height:100%}
+canvas#cur{position:fixed;top:0;left:0;pointer-events:none;z-index:9999}
+
+/* HEADER */
+#site-header{background:#0a0a0a;border-bottom:4px solid #ff8c00;padding:0 24px}
+#header-top{display:flex;align-items:center;gap:16px;padding:14px 0 10px}
+.site-logo{font-size:22px;color:#ff8c00;text-shadow:0 0 16px #ff8c0066;display:flex;align-items:center;gap:10px}
+.site-logo span{font-size:28px;animation:bob 2s infinite ease-in-out}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.header-date{font-size:6px;color:#555;margin-left:auto}
+#ticker{background:#ff8c00;color:#000;font-size:7px;padding:5px 0;overflow:hidden;white-space:nowrap;border-top:2px solid #cc6600}
+#ticker-inner{display:inline-block;animation:scroll 30s linear infinite}
+@keyframes scroll{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}
+
+/* NAV */
+#nav{display:flex;gap:0;border-bottom:2px solid #333;background:#111}
+.nav-link{font-size:7px;padding:10px 16px;color:#888;cursor:none;border-right:1px solid #333;transition:.15s;text-decoration:none;display:block}
+.nav-link:hover,.nav-link.active{background:#ff8c00;color:#000}
+
+/* LAYOUT */
+#content{max-width:1100px;margin:0 auto;padding:20px;display:flex;gap:20px}
+#main-col{flex:1;min-width:0}
+#side-col{width:280px;flex-shrink:0}
+
+/* FEATURED */
+#featured{background:#111;border:3px solid #ff8c00;margin-bottom:20px;overflow:hidden}
+#featured-img{width:100%;height:240px;background:linear-gradient(135deg,#1a0800,#0d0d0d);display:flex;align-items:center;justify-content:center;font-size:80px;border-bottom:2px solid #ff8c00}
+#featured-body{padding:16px}
+#featured-tag{font-size:6px;background:#ff8c00;color:#000;padding:3px 8px;display:inline-block;margin-bottom:8px}
+#featured-title{font-size:14px;color:#ff8c00;line-height:1.6;margin-bottom:8px}
+#featured-excerpt{font-size:9px;color:#aaa;font-family:'VT323',monospace;font-size:16px;line-height:1.6}
+#featured-meta{font-size:6px;color:#555;margin-top:10px}
+#featured-read{display:inline-block;margin-top:10px;font-size:7px;padding:6px 12px;border:2px solid #ff8c00;color:#ff8c00;cursor:none;transition:.15s}
+#featured-read:hover{background:#ff8c00;color:#000}
+
+/* ARTICLE GRID */
+#article-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:20px}
+.article-card{background:#111;border:2px solid #333;overflow:hidden;cursor:none;transition:.15s}
+.article-card:hover{border-color:#ff8c00}
+.card-img{height:120px;background:#0a0a0a;display:flex;align-items:center;justify-content:center;font-size:48px;border-bottom:1px solid #333}
+.card-body{padding:12px}
+.card-tag{font-size:5px;padding:2px 6px;border:1px solid;display:inline-block;margin-bottom:6px}
+.card-tag.game{border-color:#ff8c00;color:#ff8c00}
+.card-tag.update{border-color:#0af;color:#0af}
+.card-tag.community{border-color:#0f0;color:#0f0}
+.card-tag.dev{border-color:#a0f;color:#a0f}
+.card-tag.news{border-color:#f84;color:#f84}
+.card-title{font-size:8px;color:#ff8c00;line-height:1.6;margin-bottom:6px}
+.card-excerpt{font-size:12px;color:#aaa;font-family:'VT323',monospace;line-height:1.5;margin-bottom:8px}
+.card-meta{font-size:5px;color:#555;display:flex;justify-content:space-between}
+.card-read{font-size:6px;color:#ff8c00;cursor:none;border-bottom:1px solid transparent;transition:.15s}
+.card-read:hover{border-color:#ff8c00}
+
+/* SIDEBAR */
+.side-block{background:#111;border:2px solid #333;padding:14px;margin-bottom:14px}
+.side-title{font-size:8px;color:#ff8c00;border-bottom:2px solid #ff8c00;padding-bottom:6px;margin-bottom:10px}
+.side-item{padding:7px 0;border-bottom:1px solid #222;cursor:none;font-size:7px;color:#888;transition:.15s;display:flex;gap:8px;align-items:flex-start}
+.side-item:hover{color:#ff8c00}
+.side-item:last-child{border-bottom:none}
+.side-num{font-size:10px;color:#333;flex-shrink:0;width:16px}
+.side-tag-row{display:flex;flex-wrap:wrap;gap:6px}
+.tag-pill{font-size:6px;padding:3px 8px;border:1px solid #444;color:#888;cursor:none;transition:.15s}
+.tag-pill:hover{border-color:#ff8c00;color:#ff8c00}
+
+/* SEARCH */
+#search-bar{display:flex;gap:0;margin-bottom:16px}
+#search-input{flex:1;font-family:'Press Start 2P',monospace;font-size:7px;background:#111;border:2px solid #444;color:#ff8c00;padding:8px;outline:none}
+#search-input:focus{border-color:#ff8c00}
+#search-btn{font-family:'Press Start 2P',monospace;font-size:7px;padding:8px 12px;background:#ff8c00;border:2px solid #ff8c00;color:#000;cursor:none}
+#search-btn:hover{background:#cc6600;border-color:#cc6600}
+
+/* CATEGORY FILTER */
+#cat-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.cat-btn{font-family:'Press Start 2P',monospace;font-size:6px;padding:5px 9px;background:#111;border:2px solid #444;color:#888;cursor:none;transition:.15s}
+.cat-btn:hover,.cat-btn.active{border-color:#ff8c00;color:#ff8c00;background:#1a1a1a}
+
+/* SUBMIT */
+#submit-section{background:#0f0f00;border:3px solid #ff8c00;padding:20px;margin-bottom:20px}
+#submit-title{font-size:10px;color:#ff8c00;margin-bottom:14px;border-bottom:2px solid #ff8c00;padding-bottom:8px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.field-label{font-size:6px;color:#888}
+input[type=text],select,textarea{font-family:'Press Start 2P',monospace;font-size:7px;background:#0a0a0a;border:2px solid #444;color:#ff8c00;padding:7px;outline:none;width:100%}
+input[type=text]:focus,select:focus,textarea:focus{border-color:#ff8c00}
+select option{background:#111}
+.submit-row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{font-family:'Press Start 2P',monospace;font-size:7px;padding:8px 14px;background:#111;border:2px solid #ff8c00;color:#ff8c00;cursor:none;transition:.15s}
+.btn:hover{background:#ff8c00;color:#000}
+.btn.red{border-color:#f44;color:#f44}.btn.red:hover{background:#f44;color:#fff}
+
+/* ARTICLE VIEW */
+#article-view{display:none;max-width:800px;margin:0 auto;padding:20px}
+#article-view.active{display:block}
+#article-content-area{display:block}
+#av-tag{font-size:6px;background:#ff8c00;color:#000;padding:3px 8px;display:inline-block;margin-bottom:10px}
+#av-title{font-size:16px;color:#ff8c00;line-height:1.6;margin-bottom:10px}
+#av-meta{font-size:6px;color:#555;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #333}
+#av-body{font-size:15px;color:#ccc;font-family:'VT323',monospace;line-height:1.8;margin-bottom:20px}
+#av-emoji{font-size:80px;display:block;text-align:center;margin:16px 0}
+.back-btn{font-size:7px;padding:7px 12px;border:2px solid #888;color:#888;cursor:none;transition:.15s;display:inline-block;margin-bottom:16px}
+.back-btn:hover{border-color:#ff8c00;color:#ff8c00}
+
+/* COMMENTS */
+#comments-section{margin-top:20px;border-top:2px solid #333;padding-top:16px}
+.comment-box{background:#111;border:2px solid #333;padding:10px;margin-bottom:8px}
+.comment-name{font-size:6px;color:#ff8c00;margin-bottom:4px}
+.comment-text{font-size:13px;color:#aaa;font-family:'VT323',monospace;line-height:1.6}
+.comment-time{font-size:5px;color:#555;margin-top:4px}
+
+/* FOOTER */
+#footer{background:#0a0a0a;border-top:3px solid #ff8c00;padding:20px 24px;text-align:center;margin-top:30px}
+#footer-logo{font-size:12px;color:#ff8c00;margin-bottom:8px}
+#footer-links{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.footer-link{font-size:6px;color:#555;cursor:none;transition:.15s}
+.footer-link:hover{color:#ff8c00}
+#footer-copy{font-size:5px;color:#333}
+
+/* MODAL */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:500;align-items:center;justify-content:center}
+.modal.active{display:flex}
+.modal-box{background:#111;border:3px solid #ff8c00;padding:24px;max-width:500px;width:90%;display:flex;flex-direction:column;gap:10px}
+.modal-title{font-size:10px;color:#ff8c00;border-bottom:2px solid #ff8c00;padding-bottom:8px}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#0a0a0a}
+::-webkit-scrollbar-thumb{background:#ff8c00}
+</style>
+</head>
+<body>
+<canvas id="cur"></canvas>
+
+<!-- HEADER -->
+<div id="site-header">
+  <div id="header-top">
+    <div class="site-logo"><span>🎃</span> PUMPKIN NEWS</div>
+    <div style="font-size:7px;color:#ff8c00;margin-left:8px">BY PUMPKIN STUDIOS</div>
+    <div class="header-date" id="header-date"></div>
+  </div>
+  <div id="ticker"><span id="ticker-inner">🎃 WELCOME TO PUMPKIN NEWS &nbsp;&nbsp;&nbsp; 📢 THE OFFICIAL PUMPKIN STUDIOS NEWS PORTAL &nbsp;&nbsp;&nbsp; 🎮 LATEST GAMES, UPDATES & COMMUNITY NEWS &nbsp;&nbsp;&nbsp; 🏁 MAKEPLAY V2 NOW LIVE &nbsp;&nbsp;&nbsp; 👻 PUMPKIN TEACHING PLATFORM LAUNCHED &nbsp;&nbsp;&nbsp;</span></div>
+</div>
+
+<!-- NAV -->
+<div id="nav">
+  <a class="nav-link active" onclick="showSection('home')">🏠 HOME</a>
+  <a class="nav-link" onclick="showSection('games')">🎮 GAMES</a>
+  <a class="nav-link" onclick="showSection('dev')">⌨ DEV LOG</a>
+  <a class="nav-link" onclick="showSection('community')">👥 COMMUNITY</a>
+  <a class="nav-link" onclick="adminLogin()">✏ POST NEWS</a>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="content">
+  <div id="main-col">
+
+    <!-- SEARCH + FILTER -->
+    <div id="search-bar">
+      <input type="text" id="search-input" placeholder="Search news..." oninput="filterArticles()">
+      <button id="search-btn">🔍</button>
+    </div>
+    <div id="cat-filter">
+      <button class="cat-btn active" onclick="setCat('all',this)">ALL</button>
+      <button class="cat-btn" onclick="setCat('game',this)">🎮 GAMES</button>
+      <button class="cat-btn" onclick="setCat('update',this)">🔧 UPDATES</button>
+      <button class="cat-btn" onclick="setCat('dev',this)">⌨ DEV LOG</button>
+      <button class="cat-btn" onclick="setCat('community',this)">👥 COMMUNITY</button>
+      <button class="cat-btn" onclick="setCat('news',this)">📰 NEWS</button>
+    </div>
+
+    <!-- FEATURED -->
+    <div id="featured" onclick="openArticle(0)">
+      <div id="featured-img">🎃</div>
+      <div id="featured-body">
+        <div id="featured-tag">FEATURED</div>
+        <div id="featured-title">Loading...</div>
+        <div id="featured-excerpt"></div>
+        <div id="featured-meta"></div>
+        <div id="featured-read">READ MORE ▶</div>
+      </div>
+    </div>
+
+    <!-- ARTICLE GRID -->
+    <div id="article-grid"></div>
+
+    <!-- ARTICLE VIEW -->
+    <div id="article-view">
+      <div class="back-btn" onclick="closeArticle()">◀ BACK</div>
+      <div id="article-content-area">
+        <span id="av-tag"></span>
+        <div id="av-title"></div>
+        <div id="av-meta"></div>
+        <span id="av-emoji"></span>
+        <div id="av-body"></div>
+        <div id="comments-section">
+          <div style="font-size:9px;color:#ff8c00;margin-bottom:10px">💬 COMMENTS</div>
+          <div id="comment-list"></div>
+          <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+            <input type="text" id="comment-name" placeholder="Your name..." style="font-size:7px">
+            <textarea id="comment-text" rows="2" style="resize:none;font-size:7px" placeholder="Leave a comment..."></textarea>
+            <button class="btn" style="font-size:6px;padding:5px 10px;width:fit-content" onclick="postComment()">POST COMMENT</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBMIT FORM -->
+    <div id="submit-section" style="display:none">
+      <div id="submit-title">✏ SUBMIT A NEWS ARTICLE</div>
+      <div class="field"><div class="field-label">YOUR NAME / HANDLE</div><input type="text" id="s-author" placeholder="@yourname..."></div>
+      <div class="field"><div class="field-label">HEADLINE</div><input type="text" id="s-title" placeholder="Article headline..."></div>
+      <div class="field"><div class="field-label">CATEGORY</div>
+        <select id="s-cat">
+          <option value="news">📰 NEWS</option>
+          <option value="game">🎮 GAMES</option>
+          <option value="update">🔧 UPDATE</option>
+          <option value="dev">⌨ DEV LOG</option>
+          <option value="community">👥 COMMUNITY</option>
+        </select>
+      </div>
+      <div class="field"><div class="field-label">EMOJI / ICON</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="emoji-picker">
+          <span class="tag-pill emoji-opt" onclick="selEmoji(this,'🎃')">🎃</span>
+          <span class="tag-pill emoji-opt" onclick="selEmoji(this,'🎮')">🎮</span>
+          <span class="tag-pill emoji-opt" onclick="selEmoji(this,'🔧')">🔧</span>
+          <span class="tag-pill emoji-opt" onclick="selEmoji(this,'👾')">👾</span>
+          <span class="tag-pill emoji-opt" onclick="selEmoji(this,'📢')">📢</span>
+          <span class="tag-pill emoji-opt" onclick="selEmoji(this,'🏆')">🏆</span>
+          <span class="tag-pill emoji-opt" onclick="selEmoji(this,'🧪')">🧪</span>
+          <span class="tag-pill emoji-opt" onclick="selEmoji(this,'🚀')">🚀</span>
+          <span class="tag-pill emoji-opt" onclick="selEmoji(this,'💀')">💀</span>
+          <span class="tag-pill emoji-opt" onclick="selEmoji(this,'🌙')">🌙</span>
+          <span class="tag-pill emoji-opt" onclick="selEmoji(this,'🎨')">🎨</span>
+          <span class="tag-pill emoji-opt" onclick="selEmoji(this,'📝')">📝</span>
+        </div>
+      </div>
+      <div class="field"><div class="field-label">ARTICLE BODY</div><textarea id="s-body" rows="6" style="resize:vertical;font-family:'VT323',monospace;font-size:14px" placeholder="Write your article here..."></textarea></div>
+      <div id="s-error" style="font-size:7px;color:#f44;display:none"></div>
+      <div class="submit-row">
+        <button class="btn" onclick="submitArticle()">📤 SUBMIT ARTICLE</button>
+        <button class="btn red" onclick="clearForm()">CLEAR</button>
+      </div>
+    </div>
+
+  </div><!-- main-col -->
+
+  <!-- SIDEBAR -->
+  <div id="side-col">
+    <div class="side-block">
+      <div class="side-title">🔥 TRENDING</div>
+      <div id="trending-list"></div>
+    </div>
+    <div class="side-block">
+      <div class="side-title">🎮 PUMPKIN GAMES</div>
+      <div class="side-item" onclick="window.open('https://kshidenko.github.io/pumpkin/lab_rat.html','_blank')">
+        <span>🐀</span><span>Lab Rat — Horror platformer</span>
+      </div>
+      <div class="side-item" onclick="window.open('https://kshidenko.github.io/pumpkin/the_slide.html','_blank')">
+        <span>🎿</span><span>The Slide — Dodge everything</span>
+      </div>
+      <div class="side-item" onclick="window.open('https://kshidenko.github.io/pumpkin/lab_day.html','_blank')">
+        <span>🌙</span><span>Day Shift — Survive the shift</span>
+      </div>
+      <div class="side-item" onclick="window.open('https://kshidenko.github.io/makeplay/','_blank')">
+        <span>🎨</span><span>MAKEPLAY — Build your own game</span>
+      </div>
+    </div>
+    <div class="side-block">
+      <div class="side-title">🏷 TAGS</div>
+      <div class="side-tag-row" id="tag-cloud"></div>
+    </div>
+    <div class="side-block" style="background:#0f0f00;border-color:#ff8c00">
+      <div class="side-title" style="border-color:#ff8c00">📢 ABOUT</div>
+      <div style="font-size:7px;color:#888;line-height:2.2">
+        PUMPKIN NEWS is the official news portal for Pumpkin Studios.<br><br>
+        Submit your own articles, game reviews, fan content and dev updates!<br><br>
+        <span style="color:#ff8c00">by Kirill / Pumpkin Studios</span>
+      </div>
+    </div>
+  </div><!-- side-col -->
+</div><!-- content -->
+
+<!-- FOOTER -->
+<div id="footer">
+  <div id="footer-logo">🎃 PUMPKIN STUDIOS</div>
+  <div id="footer-links">
+    <span class="footer-link" onclick="window.open('https://kshidenko.github.io/pumpkin/','_blank')">GAMES PORTAL</span>
+    <span class="footer-link" onclick="window.open('https://kshidenko.github.io/makeplay/','_blank')">MAKEPLAY</span>
+    <span class="footer-link" onclick="window.open('https://kshidenko.github.io/pumpkin-teaching/','_blank')">PUMPKIN TEACHING</span>
+    <span class="footer-link" onclick="adminLogin()">POST NEWS</span>
+  </div>
+  <div id="footer-copy">© PUMPKIN STUDIOS — ALL RIGHTS RESERVED</div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal" id="success-modal">
+  <div class="modal-box">
+    <div class="modal-title">✅ ARTICLE SUBMITTED!</div>
+    <div style="font-size:8px;color:#ccc;font-family:'VT323',monospace;font-size:15px;line-height:1.8">Your article has been published to Pumpkin News! Thanks for contributing.</div>
+    <button class="btn" style="font-size:7px" onclick="closeModal()">CLOSE</button>
+  </div>
+</div>
+
+<script>
+// ===== CURSOR =====
+const cur=document.getElementById('cur'),cctx=cur.getContext('2d');
+function rc(){cur.width=window.innerWidth;cur.height=window.innerHeight}
+rc();window.addEventListener('resize',rc);
+let mx=0,my=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dc()});
+function dc(){
+  cctx.clearRect(0,0,cur.width,cur.height);
+  cctx.strokeStyle='#ff8c00';cctx.lineWidth=2;
+  cctx.beginPath();cctx.moveTo(mx-10,my);cctx.lineTo(mx+10,my);cctx.stroke();
+  cctx.beginPath();cctx.moveTo(mx,my-10);cctx.lineTo(mx,my+10);cctx.stroke();
+  cctx.strokeRect(mx-3,my-3,6,6);
+}
+
+// ===== DATE =====
+document.getElementById('header-date').textContent=new Date().toDateString().toUpperCase();
+
+// ===== DEFAULT ARTICLES =====
+const DEFAULT_ARTICLES=[
+  {id:1,title:'MAKEPLAY V2 LAUNCHES — BUILD YOUR OWN GAME WITH SPRITES, NPCS & MORE',author:'Kirill',cat:'update',emoji:'🎨',excerpt:'The massive MAKEPLAY v2 update is here. Pixel art sprite maker, NPC designer, visual block coding, dialogue trees, item creator and a dev planner — all in one browser tab.',body:'MAKEPLAY version 2 has officially launched!\n\nThis huge update brings:\n\n🎨 SPRITE MAKER — Draw pixel art sprites at 16x16, 32x32 or 48x48. Paint frame by frame with a full colour palette and animate at any FPS.\n\n👾 NPC DESIGNER — Create enemies and friendly NPCs. Set behavior (patrol, follow, chase, idle), health, damage, speed, dialogue and item drops.\n\n💬 DIALOGUE TREE — Build branching conversations with drag-and-drop nodes. Link trees to NPCs.\n\n🎒 ITEM CREATOR — Design keys, weapons, healing items and quest objects.\n\n⌨ SCRIPT EDITOR — Code your game logic with visual blocks, or switch to JavaScript, Lua or Python.\n\n📋 DEV PLANNER — Track your game development steps with a built-in task list.\n\nPlay games by Pumpkin Studios or export your own creation as a standalone HTML file!',time:Date.now()-86400000*2,comments:[]},
+  {id:2,title:'PUMPKIN TEACHING SOFTWARE — THE NEW SCHOOL PLATFORM IS LIVE',author:'Kirill',cat:'news',emoji:'🎃',excerpt:'Pumpkin Teaching is a full school communication platform with chat, assignments, announcements, AI homework help, games and more — built for students and teachers.',body:'Pumpkin Teaching has launched!\n\nThis is a full school platform built from scratch by Pumpkin Studios. Here is what it includes:\n\n💬 CHAT — Discord-style channels with student-only rooms teachers cannot see. Swear word filter, GIF search, image upload with AI content checking.\n\n📚 ASSIGNMENTS — Teachers send tasks with due dates, grade selection and token rewards. Students submit answers and earn tokens.\n\n📢 ANNOUNCEMENTS — School-wide or worldwide broadcasts.\n\n🤖 AI STUDY HELPER — Gives hints and guidance without just handing you the answer.\n\n💰 TOKENS — Earn tokens by completing tasks. Spend them in the shop on chat styles, avatars and badges.\n\n🎮 GAMES — Flappy Bird, Club Penguine (pirate edition), Poker and a secret student-only game.\n\n📞 CALLS — FaceTime-style calling between users.\n\nAdmin rank (Kirill) can send worldwide announcements, ban users, play annoying ads mid-lesson and monitor student activity.',time:Date.now()-86400000*1,comments:[]},
+  {id:3,title:'LAB RAT — CHAPTER 2 IN DEVELOPMENT',author:'Kirill',cat:'dev',emoji:'🐀',excerpt:'Work has begun on Lab Rat Chapter 2: Sector 3 Lower Level. New areas, new enemies and more scares coming soon.',body:'Chapter 2 of Lab Rat is in active development.\n\nThe new chapter is set in Sector 3 Lower Level — deeper underground, darker corridors and a brand new enemy type.\n\nExpect:\n- New map sections\n- Updated enemy AI\n- New jumpscare events\n- Expanded lore\n\nNo release date yet. Follow Pumpkin News for updates!',time:Date.now()-86400000*3,comments:[]},
+  {id:4,title:'PUMPKIN STUDIOS — WHO WE ARE',author:'Kirill',cat:'community',emoji:'🎃',excerpt:'A quick intro to Pumpkin Studios and what we are building.',body:'Pumpkin Studios is an indie game development studio run by Kirill.\n\nWe build retro-style browser games with a horror twist, plus tools for other creators.\n\nOUR PROJECTS:\n🐀 Lab Rat — horror platformer\n🎿 The Slide — arcade survival\n🌙 Day Shift — night shift horror\n🎨 MAKEPLAY — browser game creator\n🎃 Pumpkin Teaching — school platform\n📰 Pumpkin News — this site!\n\nAll games and tools are free and open to play in your browser. No downloads, no accounts needed for the games.\n\nGet involved — submit fan art, news, reviews or dev logs right here on Pumpkin News!',time:Date.now()-86400000*5,comments:[]},
+  {id:5,title:'THE SLIDE — TIPS & TRICKS FOR HIGH SCORES',author:'PumpkinFan',cat:'game',emoji:'🎿',excerpt:'Community-submitted tips for getting the highest score in The Slide. Dodge patterns, speed runs and more.',body:'Here are some community tips for The Slide:\n\n1. LEARN THE PATTERNS — obstacles appear in repeating groups. Once you know the pattern, you can anticipate instead of react.\n\n2. STAY CENTRE — the centre lane gives you the most escape routes in either direction.\n\n3. DONT PANIC SCROLL — rapid side-to-side movement slows your reaction time. Small corrections beat big swerves.\n\n4. SPEED BUILDS SCORE — the longer you survive, the faster you go and the more points per second.\n\n5. SOUND ON — audio cues can warn you about incoming obstacles before they appear on screen.\n\nSubmit your high score in the comments!',time:Date.now()-86400000*4,comments:[]},
+];
+
+// ===== STATE =====
+function getArticles(){
+  const saved=localStorage.getItem('pn_articles');
+  const custom=saved?JSON.parse(saved):[];
+  return [...DEFAULT_ARTICLES,...custom];
+}
+function saveArticle(a){
+  const saved=JSON.parse(localStorage.getItem('pn_articles')||'[]');
+  saved.unshift(a);
+  localStorage.setItem('pn_articles',JSON.stringify(saved));
+}
+
+let curCat='all',curArticleId=null,selectedEmoji='🎃';
+let allArticles=getArticles();
+
+// ===== SECTIONS =====
+function showSection(id){
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('submit-section').style.display=id==='submit'?'block':'none';
+  if(id!=='submit'){renderArticles();closeArticle()}
+}
+
+// ===== RENDER =====
+function renderArticles(){
+  allArticles=getArticles();
+  const q=document.getElementById('search-input').value.toLowerCase();
+  let filtered=allArticles.filter(a=>{
+    const matchCat=curCat==='all'||a.cat===curCat;
+    const matchQ=!q||a.title.toLowerCase().includes(q)||a.excerpt.toLowerCase().includes(q)||a.author.toLowerCase().includes(q);
+    return matchCat&&matchQ;
+  });
+
+  // Featured = first article
+  if(filtered.length>0){
+    const f=filtered[0];
+    document.getElementById('featured').style.display='block';
+    document.getElementById('featured').onclick=()=>openArticle(f.id);
+    document.getElementById('featured-img').textContent=f.emoji||'🎃';
+    document.getElementById('featured-tag').textContent=f.cat.toUpperCase();
+    document.getElementById('featured-title').textContent=f.title;
+    document.getElementById('featured-excerpt').textContent=f.excerpt;
+    document.getElementById('featured-meta').textContent='By @'+f.author+' · '+timeAgo(f.time);
+  }
+
+  // Grid = rest
+  const grid=document.getElementById('article-grid');grid.innerHTML='';
+  filtered.slice(1).forEach(a=>{
+    const d=document.createElement('div');d.className='article-card';
+    d.innerHTML=`<div class="card-img">${a.emoji||'🎃'}</div>
+      <div class="card-body">
+        <div class="card-tag ${a.cat}">${a.cat.toUpperCase()}</div>
+        <div class="card-title">${a.title}</div>
+        <div class="card-excerpt">${a.excerpt}</div>
+        <div class="card-meta">
+          <span>@${a.author} · ${timeAgo(a.time)}</span>
+          <span class="card-read">READ ▶</span>
+        </div>
+      </div>`;
+    d.onclick=()=>openArticle(a.id);
+    grid.appendChild(d);
+  });
+
+  renderTrending(filtered);
+  renderTags();
+}
+
+function renderTrending(articles){
+  const el=document.getElementById('trending-list');el.innerHTML='';
+  articles.slice(0,5).forEach((a,i)=>{
+    el.innerHTML+=`<div class="side-item" onclick="openArticle(${a.id})">
+      <span class="side-num">${i+1}</span>
+      <span>${a.title}</span>
+    </div>`;
+  });
+}
+
+function renderTags(){
+  const tags=['pumpkin','game','update','horror','makeplay','teaching','dev','community','labrat','slide'];
+  const el=document.getElementById('tag-cloud');el.innerHTML='';
+  tags.forEach(t=>{
+    el.innerHTML+=`<div class="tag-pill" onclick="document.getElementById('search-input').value='${t}';filterArticles()">#${t}</div>`;
+  });
+}
+
+function filterArticles(){renderArticles()}
+function setCat(cat,el){
+  curCat=cat;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderArticles();
+}
+
+// ===== ARTICLE VIEW =====
+function openArticle(id){
+  const a=allArticles.find(x=>x.id===id);if(!a)return;
+  curArticleId=id;
+  document.getElementById('featured').style.display='none';
+  document.getElementById('article-grid').style.display='none';
+  document.getElementById('search-bar').style.display='none';
+  document.getElementById('cat-filter').style.display='none';
+  document.getElementById('article-view').style.display='block';
+  document.getElementById('av-tag').textContent=a.cat.toUpperCase();
+  document.getElementById('av-tag').style.cssText='font-size:6px;background:#ff8c00;color:#000;padding:3px 8px;display:inline-block;margin-bottom:10px';
+  document.getElementById('av-title').textContent=a.title;
+  document.getElementById('av-meta').textContent='By @'+a.author+' · '+timeAgo(a.time)+' · '+a.cat.toUpperCase();
+  document.getElementById('av-emoji').textContent=a.emoji||'🎃';
+  document.getElementById('av-body').innerHTML=a.body.replace(/\n/g,'<br>');
+  renderComments(a);
+  window.scrollTo(0,0);
+}
+function closeArticle(){
+  document.getElementById('article-view').style.display='none';
+  document.getElementById('featured').style.display='block';
+  document.getElementById('article-grid').style.display='grid';
+  document.getElementById('search-bar').style.display='flex';
+  document.getElementById('cat-filter').style.display='flex';
+  curArticleId=null;
+}
+
+// ===== COMMENTS =====
+function renderComments(a){
+  const el=document.getElementById('comment-list');el.innerHTML='';
+  (a.comments||[]).forEach(c=>{
+    el.innerHTML+=`<div class="comment-box">
+      <div class="comment-name">@${c.name}</div>
+      <div class="comment-text">${c.text}</div>
+      <div class="comment-time">${timeAgo(c.time)}</div>
+    </div>`;
+  });
+  if(!a.comments||!a.comments.length)el.innerHTML='<div style="font-size:7px;color:#555;padding:8px 0">No comments yet. Be first!</div>';
+}
+function postComment(){
+  const name=document.getElementById('comment-name').value.trim()||'Anonymous';
+  const text=document.getElementById('comment-text').value.trim();
+  if(!text)return;
+  const saved=JSON.parse(localStorage.getItem('pn_articles')||'[]');
+  const all=getArticles();
+  const a=all.find(x=>x.id===curArticleId);if(!a)return;
+  a.comments=a.comments||[];
+  a.comments.push({name,text,time:Date.now()});
+  // If it's a custom article save it back
+  const si=saved.findIndex(x=>x.id===curArticleId);
+  if(si>=0){saved[si]=a;localStorage.setItem('pn_articles',JSON.stringify(saved))}
+  document.getElementById('comment-name').value='';
+  document.getElementById('comment-text').value='';
+  renderComments(a);allArticles=getArticles();
+}
+
+// ===== SUBMIT =====
+let selectedEmoji2='🎃';
+function selEmoji(el,em){
+  selectedEmoji2=em;
+  document.querySelectorAll('.emoji-opt').forEach(e=>e.style.borderColor='');
+  el.style.borderColor='#ff8c00';el.style.color='#ff8c00';
+}
+function submitArticle(){
+  const author=document.getElementById('s-author').value.trim()||'Anonymous';
+  const title=document.getElementById('s-title').value.trim();
+  const cat=document.getElementById('s-cat').value;
+  const body=document.getElementById('s-body').value.trim();
+  const err=document.getElementById('s-error');
+  if(!title||!body){err.style.display='block';err.textContent='Please fill in the headline and body!';return}
+  err.style.display='none';
+  const article={
+    id:Date.now(),
+    title,author,cat,
+    emoji:selectedEmoji2||'🎃',
+    excerpt:body.slice(0,120)+(body.length>120?'...':''),
+    body,
+    time:Date.now(),
+    comments:[]
+  };
+  saveArticle(article);
+  clearForm();
+  document.getElementById('success-modal').classList.add('active');
+  allArticles=getArticles();
+  renderArticles();
+  showSection('home');
+}
+function clearForm(){
+  document.getElementById('s-author').value='';
+  document.getElementById('s-title').value='';
+  document.getElementById('s-body').value='';
+  document.getElementById('s-error').style.display='none';
+}
+function closeModal(){document.getElementById('success-modal').classList.remove('active')}
+
+// ===== UTILS =====
+function timeAgo(ts){
+  const diff=Date.now()-ts;
+  const m=Math.floor(diff/60000);
+  const h=Math.floor(diff/3600000);
+  const d=Math.floor(diff/86400000);
+  if(d>0)return d+'d ago';
+  if(h>0)return h+'h ago';
+  if(m>0)return m+'m ago';
+  return 'just now';
+}
+
+// ===== INIT =====
+renderArticles();
+</script>
+</body>
+</html>
+<!-- injected admin login modal -->
+<div class="modal" id="admin-modal">
+  <div class="modal-box">
+    <div class="modal-title">🔒 ADMIN LOGIN</div>
+    <div style="font-size:7px;color:#888;line-height:2;margin-bottom:4px">Only Kirill can post articles.</div>
+    <div class="field"><div class="field-label">PASSWORD</div><input type="password" id="admin-pass" placeholder="Enter password..." onkeydown="if(event.key==='Enter')checkAdmin()"></div>
+    <div id="admin-err" style="font-size:7px;color:#f44;display:none">❌ Wrong password!</div>
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <button class="btn" onclick="checkAdmin()" style="font-size:6px;padding:5px 10px">ENTER ▶</button>
+      <button class="btn red" onclick="document.getElementById('admin-modal').classList.remove('active');document.getElementById('admin-pass').value=''" style="font-size:6px;padding:5px 10px">CANCEL</button>
+    </div>
+  </div>
+</div>
+<script>
+// ADMIN PASSWORD — change this to whatever you want
+const ADMIN_PASS='pumpkin123';
+let adminUnlocked=false;
+function adminLogin(){
+  if(adminUnlocked){showSection('submit');return}
+  document.getElementById('admin-modal').classList.add('active');
+  setTimeout(()=>document.getElementById('admin-pass').focus(),100);
+}
+function checkAdmin(){
+  const p=document.getElementById('admin-pass').value;
+  if(p===ADMIN_PASS){
+    adminUnlocked=true;
+    document.getElementById('admin-modal').classList.remove('active');
+    document.getElementById('admin-pass').value='';
+    document.getElementById('admin-err').style.display='none';
+    showSection('submit');
+  } else {
+    document.getElementById('admin-err').style.display='block';
+    document.getElementById('admin-pass').value='';
+  }
+}
+</script>
